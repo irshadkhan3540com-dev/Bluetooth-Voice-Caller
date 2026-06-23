@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.btcaller">
 
-    <!-- ब्लूटूथ और लोकेशन की जरूरी परमिशन -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
@@ -12,12 +11,11 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@android:drawable/sym_def_app_icon"
         android:label="Bluetooth Voice Caller"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@android:drawable/sym_def_app_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"> 
-        <!-- ऊपर वाली थीम लाइन सबसे ज़रूरी है -->
         
         <activity
             android:name=".ui.MainActivity"
