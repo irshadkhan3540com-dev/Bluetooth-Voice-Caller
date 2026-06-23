@@ -8,11 +8,9 @@ import android.content.Context
 
 class BTManager(private val context: Context) {
 
-    // एंड्रॉइड के ब्लूटूथ सिस्टम को एक्टिव करना
-    private val bluetoothManager: BluetoothManager =
-        context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-    
-    val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
+    // Fix: यहाँ 'as?' लगाया है ताकि ऐप क्रैश न हो
+    private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+    val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
 
     // 1. चेक करना कि फोन में ब्लूटूथ ऑन है या ऑफ
     fun isBluetoothEnabled(): Boolean {
@@ -42,4 +40,3 @@ class BTManager(private val context: Context) {
         return bluetoothAdapter?.bondedDevices?.toList() ?: emptyList()
     }
 }
-
