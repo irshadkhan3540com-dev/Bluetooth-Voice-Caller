@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState: Bundle?)
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main) // XML स्क्रीन को कोड से जोड़ना
 
         btManager = BTManager(this)
