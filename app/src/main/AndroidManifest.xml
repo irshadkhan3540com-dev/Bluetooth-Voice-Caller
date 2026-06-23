@@ -2,23 +2,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.btcaller">
 
-    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
+    <!-- ब्लूटूथ और लोकेशन की जरूरी परमिशन -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_app_logo"
-        android:label="Bluetooth Caller"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Bluetooth Voice Caller"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
-
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"> 
+        <!-- ऊपर वाली थीम लाइन सबसे ज़रूरी है -->
+        
         <activity
             android:name=".ui.MainActivity"
             android:exported="true">
@@ -28,18 +28,9 @@
             </intent-filter>
         </activity>
 
-        <activity 
-            android:name=".ui.CallActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"/>
-
-        <service
-            android:name=".service.CallService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="microphone" />
-
+        <activity android:name=".ui.CallActivity" />
+        <service android:name=".service.CallService" />
+        
     </application>
-
 </manifest>
 
