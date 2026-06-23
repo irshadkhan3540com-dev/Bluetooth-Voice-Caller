@@ -2,49 +2,61 @@ package com.example.btcaller.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.btcaller.R
 import com.example.btcaller.service.CallService
 
 class CallActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState: Bundle?)
-        
-        // सामने वाले ब्लूटूथ डिवाइस का नाम और एड्रेस दूसरी स्क्रीन से यहाँ आएगा
+        setContentView(R.layout.activity_call) // कॉलिंग स्क्रीन UI को जोड़ना
+
         val deviceName = intent.getStringExtra("REMOTE_DEVICE_NAME") ?: "अज्ञात डिवाइस"
         val deviceAddress = intent.getStringExtra("REMOTE_DEVICE_ADDRESS")
         
-        // स्क्रीन पर छोटा सा मैसेज दिखाओ कि कॉल जुड़ रही है
-        Toast.makeText(this, "$deviceName के साथ कॉल कनेक्ट हो रही है...", Toast.LENGTH_LONG).show()
+        // स्क्रीन पर सामने वाले डिवाइस का नाम सेट करना
+        val callerNameText = findViewById<TextView>(R.id.callerNameText)
+        callerNameText.text = deviceName
 
-        // 1. जैसे ही कॉलिंग स्क्रीन खुलेगी, हम बैकग्राउंड 'CallService' को एक्टिव कर देंगे
+        // 1. बैकग्राउंड CallService को एक्टिव करना
         val serviceIntent = Intent(this, CallService::class.java)
         startService(serviceIntent)
 
-        // 2. यहाँ पर हम C++ इंजन को कॉल कनेक्ट करने का सिग्नल भेजेंगे
+        // 2. C++ वॉइस इंजन को एक्टिव करना और ब्लूटूथ कनेक्शन बनाना
         startNativeAudioConnection(deviceAddress)
     }
 
-    // C++ इंजन से जुड़ने वाला काल्पनिक फंक्शन (इसे हम C++ कोड लिखते समय असली बनाएंगे)
-    private fun startNativeAudioConnection(address: String?) {
-        // यहाँ C++ (JNI) के जरिए ब्लूटूथ सॉकेट खुलेगा और माइक चालू होगा
-    }
+    // C++ (JNI) लेयर से सीधे बात करने वाले असली फंक्शन्स
+    private external fun startNativeAudioConnection(address: String?)
+    private external fun stopNativeAudioConnection()
 
-    // जब यूजर स्क्रीन पर "कॉल काटें" (Disconnect) बटन दबाएगा, तब यह फंक्शन चलेगा
-    fun onDisconnectButtonClicked() {
-        // 1. बैकग्राउंड सर्विस को बंद करो ताकि नोटिफिकेशन हट जाए
+    // जब यूजर स्क्रीन पर "कॉल समाप्त करें" बटन दबाएगा
+    fun onDisconnectButtonClicked(view: View) {
+        // 1. C++ इंजन को ब्लूटूथ सॉकेट बंद करने का सिग्नल देना
+        stopNativeAudioConnection()
+
+        // 2. बैकग्राउंड सर्विस को बंद करना
         val serviceIntent = Intent(this, CallService::class.java)
         stopService(serviceIntent)
 
-        // 2. यूजर को बताओ और स्क्रीन बंद कर दो
-        Toast.makeText(this, "कॉल काट दी गई है", Toast.LENGTH_SHORT).show()
-        finish() 
+        Toast.makeText(this, "कॉल समाप्त कर दी गई", Toast.LENGTH_SHORT).show()
+        finish() // स्क्रीन बंद करना
     }
 
-    override fun onBackPressed() {
-        // अगर कॉल चल रही है, तो बैक बटन दबाने से कॉल कटेगी नहीं, सिर्फ स्क्रीन पीछे होगी
-        super.onBackPressed()
+    override fun onDestroy() {
+        super.onDestroy()
+        stopNativeAudioConnection()
+    }
+
+    companion object {
+        // हमारे C++ इंजन (CMakeLists) की बनाई हुई लाइब्रेरी को लोड करना
+        init {
+            System.loadLibrary("btcaller")
+        }
     }
 }
 
