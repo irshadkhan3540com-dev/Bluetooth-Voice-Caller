@@ -1,0 +1,21 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+// हमारे प्रोजेक्ट का नाम
+rootProject.name = "Bluetooth-Voice-Caller"
+
+// एंड्रॉइड को बताना कि हमारा मुख्य कोड 'app' फोल्डर के अंदर है
+include ':app'
+
