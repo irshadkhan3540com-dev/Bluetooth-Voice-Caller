@@ -17,7 +17,7 @@
         android:icon="@drawable/ic_app_logo"
         android:label="ब्लूटूथ वॉइस कॉलर"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
 
         <activity
             android:name=".ui.MainActivity"
