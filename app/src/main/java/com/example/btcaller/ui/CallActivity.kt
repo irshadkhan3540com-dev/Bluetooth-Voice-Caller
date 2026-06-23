@@ -12,10 +12,10 @@ import com.example.btcaller.service.CallService
 class CallActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState: Bundle?)
+        super.onCreate(savedInstanceState) // यहाँ फिक्स कर दिया है (: Bundle? हटा दिया)
         setContentView(R.layout.activity_call) // कॉलिंग स्क्रीन UI को जोड़ना
 
-        val deviceName = intent.getStringExtra("REMOTE_DEVICE_NAME") ?: "अज्ञात डिवाइस"
+        val deviceName = intent.getStringExtra("REMOTE_DEVICE_NAME") ?: "अज्ञान डिवाइस"
         val deviceAddress = intent.getStringExtra("REMOTE_DEVICE_ADDRESS")
         
         // स्क्रीन पर सामने वाले डिवाइस का नाम सेट करना
