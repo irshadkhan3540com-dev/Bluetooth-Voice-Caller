@@ -1,6 +1,6 @@
 name: Build Android APK
 
-on: 
+on:
   push:
     branches: [ "main" ]
 
@@ -29,4 +29,11 @@ jobs:
 
     - name: Compile and Build Debug APK
       run: gradle assembleDebug
+
+    # यह है वो जरूरी कमांड जो डाउनलोड बटन वापस लाएगा
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Bluetooth-Caller-APK
+        path: app/build/outputs/apk/debug/app-debug.apk
 
