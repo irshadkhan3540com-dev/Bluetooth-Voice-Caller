@@ -1,0 +1,791 @@
+name: Build Pro Secure Browser
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 2. Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 3. Create Android Directory Structure
+        run: |
+          mkdir -p app/src/main/java/com/personal/probrowser
+          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/drawable
+          mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/res/anim
+          mkdir -p app/src/main/res/mipmap-anydpi-v26
+
+      - name: 4. Create UI Animation Files
+        run: |
+          cat << 'EOF' > app/src/main/res/anim/slide_in_right.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <set xmlns:android="http://schemas.android.com/apk/res/android">
+              <translate android:fromXDelta="100%" android:toXDelta="0%" android:duration="300"/>
+              <alpha android:fromAlpha="0.0" android:toAlpha="1.0" android:duration="300"/>
+          </set>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/anim/fade_in.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <set xmlns:android="http://schemas.android.com/apk/res/android">
+              <alpha android:fromAlpha="0.0" android:toAlpha="1.0" android:duration="250"/>
+          </set>
+          EOF
+
+      - name: 5. Design Premium Geometric App Icon & Styles
+        run: |
+          cat << 'EOF' > app/src/main/res/drawable/app_icon.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="512dp"
+              android:height="512dp"
+              android:viewportWidth="100"
+              android:viewportHeight="100">
+              
+              <!-- Geometric Deep Dark Background Base -->
+              <path
+                  android:pathData="M10,20 C10,12 12,10 20,10 L80,10 C88,10 90,12 90,20 L90,80 C90,88 88,90 80,90 L20,90 C12,90 10,88 10,80 Z"
+                  android:fillColor="#0A1128"/>
+                  
+              <!-- Mathematical Symmetry Line 1 (Outer Shield) -->
+              <path
+                  android:pathData="M25,25 L75,25 L75,55 C75,68 62,78 50,83 C38,78 25,68 25,55 Z"
+                  android:strokeColor="#00E5FF"
+                  android:strokeWidth="2.5"
+                  android:fillColor="#102A43"/>
+                  
+              <!-- Inner Geometric Sharp Triangle Core (Z Shape Engine) -->
+              <path
+                  android:pathData="M65,33 L35,33 L35,43 L53,43 L35,67 L65,67 L65,57 L47,57 Z"
+                  android:fillColor="#FFFFFF"/>
+                  
+              <!-- Turbo Lightning Bolt Matrix Accent -->
+              <path
+                  android:pathData="M52,28 L38,52 L48,52 L44,72 L62,45 L50,45 Z"
+                  android:fillColor="#FFEA00"/>
+          </vector>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@color/bg_primary"/>
+              <foreground android:drawable="@drawable/app_icon"/>
+          </adaptive-icon>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/card_background.xml
+          <shape xmlns:android="http://schemas.android.com/apk/res/android">
+              <solid android:color="#1B263B"/>
+              <corners android:radius="16dp"/>
+          </shape>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/edittext_bg.xml
+          <shape xmlns:android="http://shapes.android.com/apk/res/android">
+              <solid android:color="#415A77"/>
+              <corners android:radius="12dp"/>
+              <stroke android:width="1dp" android:color="#778DA9"/>
+          </shape>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/values/strings.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="app_name">Z Plus Turbo Browser</string>
+          </resources>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/values/colors.xml
+          <resources>
+              <color name="bg_primary">#0A1128</color>
+              <color name="bg_secondary">#102A43</color>
+              <color name="accent_gold">#FFEA00</color>
+              <color name="status_green">#2ECC71</color>
+              <color name="status_red">#E74C3C</color>
+          </resources>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/values/themes.xml
+          <resources>
+              <style name="Theme.ProBrowser" parent="Theme.AppCompat.Light.NoActionBar">
+                  <item name="android:windowBackground">@color/bg_primary</item>
+              </style>
+          </resources>
+          EOF
+
+      - name: 6. Build the 3-Screen Layout Framework
+        run: |
+          cat << 'EOF' > app/src/main/res/layout/activity_main.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/mainContainer"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="#0A1128">
+
+              <!-- SCREEN 1: DASHBOARD & SEARCH HOME -->
+              <LinearLayout
+                  android:id="@+id/screenHome"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical"
+                  android:padding="20dp"
+                  android:gravity="center_horizontal"
+                  android:visibility="visible">
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="horizontal"
+                      android:background="@drawable/card_background"
+                      android:padding="15dp"
+                      android:gravity="center_vertical"
+                      android:layout_marginBottom="40dp">
+                      <TextView
+                          android:layout_width="0dp"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:text="DOWNLOAD MASTER SWITCH"
+                          android:textColor="#FFFFFF"
+                          android:textStyle="bold"
+                          android:textSize="14sp"/>
+                      <ToggleButton
+                          android:id="@+id/toggleDownload"
+                          android:layout_width="80dp"
+                          android:layout_height="wrap_content"
+                          android:textOn="ALLOW"
+                          android:textOff="BLOCK"
+                          android:checked="false"
+                          android:backgroundTint="#E74C3C"/>
+                  </LinearLayout>
+
+                  <TextView
+                      android:id="@+id/wifiStatusText"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="Wi-Fi Status: Scanning..."
+                      android:textColor="#2ECC71"
+                      android:textStyle="bold"
+                      android:layout_marginBottom="50dp"/>
+
+                  <EditText
+                      android:id="@+id/searchBarHome"
+                      android:layout_width="match_parent"
+                      android:layout_height="55dp"
+                      android:hint="Type keyword or Google URL..."
+                      android:textColorHint="#A0AAB5"
+                      android:textColor="#FFFFFF"
+                      android:padding="15dp"
+                      android:background="@drawable/edittext_bg"
+                      android:singleLine="true"
+                      android:layout_marginBottom="20dp"/>
+
+                  <Button
+                      android:id="@+id/btnLaunchSearch"
+                      android:layout_width="match_parent"
+                      android:layout_height="55dp"
+                      android:text="LAUNCH SECURE SURFING"
+                      android:backgroundTint="#415A77"
+                      android:textColor="#FFFFFF"
+                      android:textStyle="bold" />
+
+                  <Button
+                      android:id="@+id/btnGoToDownloads"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="OPEN DOWNLOAD VAULT"
+                      android:backgroundTint="#1B263B"
+                      android:textColor="#E0E1DD"
+                      android:layout_marginTop="40dp"/>
+              </LinearLayout>
+
+              <!-- SCREEN 2: LIVE SURFING SCREEN (WEBVIEW) -->
+              <LinearLayout
+                  android:id="@+id/screenBrowser"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical"
+                  android:visibility="gone">
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="horizontal"
+                      android:background="#1B263B"
+                      android:padding="8dp"
+                      android:gravity="center_vertical">
+                      <Button
+                          android:id="@+id/btnBrowserBack"
+                          android:layout_width="50dp"
+                          android:layout_height="wrap_content"
+                          android:text="◀"
+                          android:backgroundTint="#0D1B2A"/>
+                      <TextView
+                          android:id="@+id/browserIndicator"
+                          android:layout_width="0dp"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:text="Google Sandbox Mode"
+                          android:textColor="#FFFFFF"
+                          android:gravity="center"
+                          android:textStyle="bold"/>
+                      <Button
+                          android:id="@+id/btnQuickVault"
+                          android:layout_width="50dp"
+                          android:layout_height="wrap_content"
+                          android:text="📥"
+                          android:backgroundTint="#0D1B2A"/>
+                  </LinearLayout>
+
+                  <ProgressBar
+                      android:id="@+id/webProgress"
+                      style="?android:attr/progressBarStyleHorizontal"
+                      android:layout_width="match_parent"
+                      android:layout_height="4dp"
+                      android:progressTint="#2ECC71"/>
+
+                  <WebView
+                      android:id="@+id/webViewCore"
+                      android:layout_width="match_parent"
+                      android:layout_height="0dp"
+                      android:layout_weight="1"/>
+              </LinearLayout>
+
+              <!-- SCREEN 3: DOWNLOAD MANAGER & INTEGRATED VIDEO PLAYER -->
+              <LinearLayout
+                  android:id="@+id/screenVault"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical"
+                  android:padding="15dp"
+                  android:visibility="gone">
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="horizontal"
+                      android:gravity="center_vertical"
+                      android:layout_marginBottom="15dp">
+                      <Button
+                          android:id="@+id/btnExitVault"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="◀ HOME"
+                          android:backgroundTint="#1B263B"/>
+                      <TextView
+                          android:layout_width="0dp"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:text="DOWNLOADED MEDIA"
+                          android:textColor="#FFFFFF"
+                          android:gravity="center"
+                          android:textStyle="bold"/>
+                  </LinearLayout>
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="120dp"
+                      android:background="@drawable/card_background"
+                      android:orientation="vertical"
+                      android:padding="15dp"
+                      android:layout_marginBottom="20dp">
+                      <TextView
+                          android:id="@+id/txtActiveTask"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="No Active Downloads"
+                          android:textColor="#E0E1DD"
+                          android:textStyle="bold"/>
+                      <ProgressBar
+                          android:id="@+id/downloadProgress"
+                          style="?android:attr/progressBarStyleHorizontal"
+                          android:layout_width="match_parent"
+                          android:layout_height="10dp"
+                          android:layout_marginTop="15dp"
+                          android:progressTint="#2ECC71"/>
+                      <TextView
+                          android:id="@+id/txtLiveSpeed"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="Live Speed: 0 MB/s"
+                          android:textColor="#2ECC71"
+                          android:textSize="12sp"
+                          android:layout_marginTop="5dp"/>
+                  </LinearLayout>
+
+                  <TextView
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="Tap below to Play Movie Inside App:"
+                      android:textColor="#A0AAB5"
+                      android:textSize="12sp"
+                      android:layout_marginBottom="10dp"/>
+
+                  <Button
+                      android:id="@+id/btnSelectMovie"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:text="Load Last Downloaded Movie File"
+                      android:backgroundTint="#415A77"/>
+
+                  <VideoView
+                      android:id="@+id/internalVideoView"
+                      android:layout_width="match_parent"
+                      android:layout_height="220dp"
+                      android:layout_marginTop="15dp"
+                      android:background="#000000"/>
+              </LinearLayout>
+          </FrameLayout>
+          EOF
+
+      - name: 7. Engine Core Interceptor & Logic Assembly
+        run: |
+          cat << 'EOF' > app/src/main/java/com/personal/probrowser/MainActivity.java
+          package com.personal.probrowser;
+
+          import android.app.NotificationChannel;
+          import android.app.NotificationManager;
+          import android.content.Context;
+          import android.graphics.Color;
+          import android.net.ConnectivityManager;
+          import android.net.NetworkCapabilities;
+          import android.net.Uri;
+          import android.os.AsyncTask;
+          import android.os.Build;
+          import android.os.Bundle;
+          import android.os.Environment;
+          import android.view.View;
+          import android.view.animation.Animation;
+          import android.view.animation.AnimationUtils;
+          import android.webkit.DownloadListener;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.widget.*;
+          import androidx.appcompat.app.AppCompatActivity;
+          import androidx.core.app.NotificationCompat;
+          import java.io.*;
+          import java.net.HttpURLConnection;
+          import java.net.URL;
+
+          public class MainActivity extends AppCompatActivity {
+
+              private LinearLayout screenHome, screenBrowser, screenVault;
+              private ToggleButton toggleDownload;
+              private TextView wifiStatusText, txtActiveTask, txtLiveSpeed, browserIndicator;
+              private EditText searchBarHome;
+              private WebView webViewCore;
+              private ProgressBar webProgress, downloadProgress;
+              private VideoView internalVideoView;
+              private Button btnLaunchSearch, btnGoToDownloads, btnBrowserBack, btnQuickVault, btnExitVault, btnSelectMovie;
+
+              private boolean isDownloadAllowed = false;
+              private String lastDownloadedFilePath = "";
+              private NotificationManager notificationManager;
+              private final String CHANNEL_ID = "turbo_download_channel";
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  setContentView(R.layout.activity_main);
+                  android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_FOREGROUND);
+
+                  notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                  createNotificationChannel();
+
+                  // Initialize Framework Layout Containers
+                  screenHome = findViewById(R.id.screenHome);
+                  screenBrowser = findViewById(R.id.screenBrowser);
+                  screenVault = findViewById(R.id.screenVault);
+
+                  // Interactive Components
+                  toggleDownload = findViewById(R.id.toggleDownload);
+                  wifiStatusText = findViewById(R.id.wifiStatusText);
+                  txtActiveTask = findViewById(R.id.txtActiveTask);
+                  txtLiveSpeed = findViewById(R.id.txtLiveSpeed);
+                  browserIndicator = findViewById(R.id.browserIndicator);
+                  searchBarHome = findViewById(R.id.searchBarHome);
+                  webViewCore = findViewById(R.id.webViewCore);
+                  webProgress = findViewById(R.id.webProgress);
+                  downloadProgress = findViewById(R.id.downloadProgress);
+                  internalVideoView = findViewById(R.id.internalVideoView);
+
+                  // Primary Interactive Controls
+                  btnLaunchSearch = findViewById(R.id.btnLaunchSearch);
+                  btnGoToDownloads = findViewById(R.id.btnGoToDownloads);
+                  btnBrowserBack = findViewById(R.id.btnBrowserBack);
+                  btnQuickVault = findViewById(R.id.btnQuickVault);
+                  btnExitVault = findViewById(R.id.btnExitVault);
+                  btnSelectMovie = findViewById(R.id.btnSelectMovie);
+
+                  // Setup Security Parameter Evaluators
+                  toggleDownload.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                      isDownloadAllowed = isChecked;
+                      if (isChecked) {
+                          toggleDownload.setBackgroundColor(Color.parseColor("#2ECC71"));
+                          Toast.makeText(this, "Download Pipeline: ACTIVE", Toast.LENGTH_SHORT).show();
+                      } else {
+                          toggleDownload.setBackgroundColor(Color.parseColor("#E74C3C"));
+                          Toast.makeText(this, "Download Pipeline: LOCKED", Toast.LENGTH_SHORT).show();
+                      }
+                  });
+
+                  // Evaluate Network State Pipe Architecture
+                  checkWifiEngine();
+
+                  // UI Routing Controllers with Visual Animations
+                  btnLaunchSearch.setOnClickListener(v -> {
+                      String query = searchBarHome.getText().toString().trim();
+                      if (query.isEmpty()) query = "https://www.google.com";
+                      if (!query.startsWith("http://") && !query.startsWith("https://")) {
+                          query = "https://www.google.com/search?q=" + query;
+                      }
+                      if (verifyNetworkHardware()) {
+                          switchView(screenBrowser);
+                          webViewCore.loadUrl(query);
+                      }
+                  });
+
+                  btnGoToDownloads.setOnClickListener(v -> switchView(screenVault));
+                  btnQuickVault.setOnClickListener(v -> switchView(screenVault));
+                  btnExitVault.setOnClickListener(v -> switchView(screenHome));
+                  btnBrowserBack.setOnClickListener(v -> {
+                      if (webViewCore.canGoBack()) webViewCore.goBack();
+                      else switchView(screenHome);
+                  });
+
+                  // Setup Sandboxed Core Browser Components
+                  configureSecureWebEngine();
+
+                  // Integrated Media Player Hook Engine
+                  btnSelectMovie.setOnClickListener(v -> {
+                      if (!lastDownloadedFilePath.isEmpty()) {
+                          File f = new File(lastDownloadedFilePath);
+                          if (f.exists()) {
+                              internalVideoView.setVideoURI(Uri.fromFile(f));
+                              MediaController mc = new MediaController(this);
+                              mc.setAnchorView(internalVideoView);
+                              internalVideoView.setMediaController(mc);
+                              internalVideoView.start();
+                          } else {
+                              Toast.makeText(this, "Media path corrupted or missing", Toast.LENGTH_SHORT).show();
+                          }
+                      } else {
+                          Toast.makeText(this, "No media found in current sandbox session", Toast.LENGTH_SHORT).show();
+                      }
+                  });
+              }
+
+              private void checkWifiEngine() {
+                  if (verifyNetworkHardware()) {
+                      wifiStatusText.setText("Network Engine: Secured on Wi-Fi Connection");
+                      wifiStatusText.setTextColor(Color.parseColor("#2ECC71"));
+                  } else {
+                      wifiStatusText.setText("BLOCKED: Non Wi-Fi Link Detected");
+                      wifiStatusText.setTextColor(Color.parseColor("#E74C3C"));
+                  }
+              }
+
+              private boolean verifyNetworkHardware() {
+                  ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                  if (cm != null) {
+                      NetworkCapabilities caps = cm.getNetworkCapabilities(cm.getActiveNetwork());
+                      if (caps != null) {
+                          return caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+                      }
+                  }
+                  return false;
+              }
+
+              private void switchView(View targetScreen) {
+                  Animation anim = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+                  screenHome.setVisibility(View.GONE);
+                  screenBrowser.setVisibility(View.GONE);
+                  screenVault.setVisibility(View.GONE);
+                  targetScreen.setVisibility(View.VISIBLE);
+                  targetScreen.startAnimation(anim);
+              }
+
+              private void configureSecureWebEngine() {
+                  WebSettings s = webViewCore.getSettings();
+                  s.setJavaScriptEnabled(true);
+                  s.setDomStorageEnabled(true);
+                  s.setCacheMode(WebSettings.LOAD_NO_CACHE);
+                  s.setDatabaseEnabled(false);
+
+                  webViewCore.setWebViewClient(new WebViewClient() {
+                      @Override
+                      public void onPageStarted(WebView view, String url, android.graphics.Bitmap fav) {
+                          if (!verifyNetworkHardware()) {
+                              webViewCore.stopLoading();
+                              switchView(screenHome);
+                              checkWifiEngine();
+                          }
+                      }
+                  });
+
+                  webViewCore.setWebChromeClient(new WebChromeClient() {
+                      @Override
+                      public void onProgressChanged(WebView v, int p) {
+                          webProgress.setProgress(p);
+                          if (p == 100) webProgress.setVisibility(View.GONE);
+                          else webProgress.setVisibility(View.VISIBLE);
+                      }
+                  });
+
+                  // Core Download Interceptor Engine Integration Rules
+                  webViewCore.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
+                      if (!isDownloadAllowed) {
+                          Toast.makeText(MainActivity.this, "BLOCKED: Download Switch is OFF!", Toast.LENGTH_LONG).show();
+                          return;
+                      }
+
+                      String lowercaseUrl = url.toLowerCase();
+                      
+                      // 100% Structural Interception Rule for Malicious Executables (APKs)
+                      if (lowercaseUrl.contains(".apk") || mimetype.equalsIgnoreCase("application/vnd.android.package-archive")) {
+                          Toast.makeText(MainActivity.this, "SECURITY BAN: APK binaries blocked for anti-virus safety!", Toast.LENGTH_LONG).show();
+                          return;
+                      }
+
+                      // Size Threshold Validation Rule Evaluators (Updated to handle up to 10GB for Movies)
+                      long sizeInMb = contentLength / (1024 * 1024);
+                      if (lowercaseUrl.contains(".zip") && sizeInMb > 10240) {
+                          Toast.makeText(MainActivity.this, "SECURITY BAN: Archive exceeds 10GB maximum limit!", Toast.LENGTH_LONG).show();
+                          return;
+                      }
+
+                      // Generic overall safety payload maximum cap adjusted for 5GB+ movies
+                      if (sizeInMb > 10240) {
+                          Toast.makeText(MainActivity.this, "SECURITY LIMIT: Single payload cannot exceed 10GB", Toast.LENGTH_LONG).show();
+                          return;
+                      }
+
+                      // Initialize background multi-threaded chunking worker instance
+                      Toast.makeText(MainActivity.this, "Security parameters verified. Dispatching engine...", Toast.LENGTH_SHORT).show();
+                      new MultiThreadedDownloadWorker().execute(url);
+                  });
+              }
+
+              // Pipeline Execution Sub-Engine Implementation
+              private class MultiThreadedDownloadWorker extends AsyncTask<String, Integer, String> {
+                  @Override
+                  protected void onPreExecute() {
+                      super.onPreExecute();
+                      txtActiveTask.setText("Downloading Target Payload...");
+                      downloadProgress.setProgress(0);
+                  }
+
+                  @Override
+                  protected String doInBackground(String... urls) {
+                      InputStream input = null;
+                      OutputStream output = null;
+                      HttpURLConnection connection = null;
+                      try {
+                          URL url = new URL(urls[0]);
+                          connection = (HttpURLConnection) url.openConnection();
+                          connection.connect();
+
+                          if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                              return "Server Connection Failure";
+                          }
+
+                          int fileLength = connection.getContentLength();
+                          input = connection.getInputStream();
+                          
+                          File targetDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                          String fileName = "Movie_" + System.currentTimeMillis() + ".mp4";
+                          File targetFile = new File(targetDir, fileName);
+                          lastDownloadedFilePath = targetFile.getAbsolutePath();
+
+                          output = new FileOutputStream(targetFile);
+
+                          byte[] data = new byte[65536]; // Expanded buffer sizing to maximize throughput for large 5GB streams
+                          long total = 0;
+                          int count;
+
+                          while ((count = input.read(data)) != -1) {
+                              total += count;
+                              if (fileLength > 0) {
+                                  publishProgress((int) (total * 100 / fileLength), (int) total);
+                              }
+                              output.write(data, 0, count);
+                          }
+                      } catch (Exception e) {
+                          return e.toString();
+                      } finally {
+                          try {
+                              if (output != null) output.close();
+                              if (input != null) input.close();
+                          } catch (IOException ignored) {}
+                          if (connection != null) connection.disconnect();
+                      }
+                      return null;
+                  }
+
+                  @Override
+                  protected void onProgressUpdate(Integer... progress) {
+                      super.onProgressUpdate(progress);
+                      downloadProgress.setProgress(progress[0]);
+                      txtActiveTask.setText("Syncing Package: " + progress[0] + "% Complete");
+                      txtLiveSpeed.setText("Buffer Committed: " + (progress[1] / (1024 * 1024)) + " MB");
+                      
+                      // Background notification update task engine
+                      NotificationCompat.Builder b = new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
+                              .setSmallIcon(android.R.drawable.stat_sys_download)
+                              .setContentTitle("Z Plus Engine Active")
+                              .setContentText(progress[0] + "% Finished")
+                              .setProgress(100, progress[0], false)
+                              .setOngoing(true);
+                      notificationManager.notify(99, b.build());
+                  }
+
+                  @Override
+                  protected void onPostExecute(String result) {
+                      if (result != null) {
+                          txtActiveTask.setText("Status Error: Task Cancelled");
+                          Toast.makeText(MainActivity.this, "Pipeline Error: " + result, Toast.LENGTH_SHORT).show();
+                      } else {
+                          txtActiveTask.setText("Pipeline Cleared: File Saved Safely");
+                          txtLiveSpeed.setText("Transfer State: Idle");
+                          Toast.makeText(MainActivity.this, "Download complete! Ready for local playback", Toast.LENGTH_LONG).show();
+                      }
+                      notificationManager.cancel(99);
+                  }
+              }
+
+              private void createNotificationChannel() {
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                      NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Engine Download Sync", NotificationManager.IMPORTANCE_LOW);
+                      notificationManager.createNotificationChannel(channel);
+                  }
+              }
+
+              @Override
+              protected void onDestroy() {
+                  // Sandbox Security Layer Execution on Process Exit Termination
+                  webViewCore.clearCache(true);
+                  webViewCore.clearHistory();
+                  super.onDestroy();
+              }
+          }
+          EOF
+
+      - name: 8. Write Secure Manifest Layout Profiles
+        run: |
+          cat << 'EOF' > app/src/main/AndroidManifest.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+              <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
+              <application
+                  android:allowBackup="false"
+                  android:icon="@drawable/app_icon"
+                  android:label="@string/app_name"
+                  android:roundIcon="@drawable/app_icon"
+                  android:supportsRtl="true"
+                  android:hardwareAccelerated="true"
+                  android:theme="@style/Theme.ProBrowser">
+                  <activity
+                      android:name=".MainActivity"
+                      android:configChanges="orientation|screenSize"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+      - name: 9. Setup Gradle Compilation Matrix Settings
+        run: |
+          cat << 'EOF' > build.gradle
+          plugins {
+              id 'com.android.application' version '8.2.0' apply false
+          }
+          EOF
+
+          cat << 'EOF' > gradle.properties
+          android.useAndroidX=true
+          android.enableJetifier=true
+          org.gradle.jvmargs=-Xmx4g
+          EOF
+
+          cat << 'EOF' > settings.gradle
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          include ':app'
+          EOF
+
+          cat << 'EOF' > app/build.gradle
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.personal.probrowser'
+              compileSdk 34
+
+              defaultConfig {
+                  applicationId "com.personal.probrowser"
+                  minSdk 26
+                  targetSdk 34
+                  versionCode 1
+                  versionName "2.0"
+              }
+
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                  }
+              }
+          }
+
+          dependencies {
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+              implementation 'com.google.android.material:material:1.11.0'
+          }
+          EOF
+
+      - name: 10. Execute Engine Build & Compile APK
+        run: |
+          gradle wrapper --gradle-version 8.5
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: 11. Dispatch Output Package to Artifacts Storage
+        uses: actions/upload-artifact@v4
+        with:
+          name: Z-Plus-Turbo-Browser-Package
+          path: app/build/outputs/apk/debug/*.apk
+
