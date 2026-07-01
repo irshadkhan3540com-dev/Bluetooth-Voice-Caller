@@ -272,7 +272,8 @@ jobs:
                   android:padding="20dp">
                   <Button android:id="@+id/btnVaultHome" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="◀ BACK TO HOME" android:backgroundTint="@color/neon_cyan" android:textColor="#000"/>
                   
-                  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Turbo Downloads & Media" android:textColor="@color/cyber_gold" android:textSize="20sp" android:textStyle="bold" android:layout_marginTop="20dp"/>
+                  <!-- BUG FIXED HERE: Replaced & with &amp; -->
+                  <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Turbo Downloads &amp; Media" android:textColor="@color/cyber_gold" android:textSize="20sp" android:textStyle="bold" android:layout_marginTop="20dp"/>
                   <ProgressBar android:id="@+id/downloadProgress" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="10dp" android:layout_marginTop="10dp" android:progressTint="@color/neon_cyan"/>
                   
                   <!-- Glassmorphism Video Player -->
@@ -289,7 +290,7 @@ jobs:
           </FrameLayout>
           EOF
 
-      - name: 7. Master Engine Java Assembly (No Limits, Multi-Thread, WakeLock)
+      - name: 7. Master Engine Java Assembly (Ad-Blocker, No Limits, Multi-Thread, WakeLock)
         run: |
           cat << 'EOF' > app/src/main/java/com/personal/probrowser/MainActivity.java
           package com.personal.probrowser;
@@ -312,6 +313,8 @@ jobs:
           import android.provider.Settings;
           import android.view.View;
           import android.webkit.WebChromeClient;
+          import android.webkit.WebResourceRequest;
+          import android.webkit.WebResourceResponse;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
@@ -339,22 +342,26 @@ jobs:
               private NotificationManager notificationManager;
               private PowerManager.WakeLock wakeLock;
               private WifiManager.WifiLock wifiLock;
-              private ExecutorService downloadEnginePool = Executors.newFixedThreadPool(8); // 8-Thread Parallel Engine
+              private ExecutorService downloadEnginePool = Executors.newFixedThreadPool(8);
 
               private static final int PERMISSION_REQ_CODE = 1001;
+
+              // AD BLOCKER DOMAINS LIST
+              private final String[] AD_HOSTS = {
+                  "doubleclick.net", "adservice.google.com", "googlesyndication.com",
+                  "adnxs.com", "criteo.com", "adform.net", "popads.net", "propellerads.com"
+              };
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
                   setContentView(R.layout.activity_main);
                   
-                  // Initialize Layouts
                   splashScreen = findViewById(R.id.splashScreen);
                   mainDashboard = findViewById(R.id.mainDashboard);
                   screenBrowser = findViewById(R.id.screenBrowser);
                   screenVault = findViewById(R.id.screenVault);
 
-                  // Setup 2-Second Splash Animation
                   new Handler(Looper.getMainLooper()).postDelayed(() -> {
                       splashScreen.setVisibility(View.GONE);
                       mainDashboard.setVisibility(View.VISIBLE);
@@ -386,9 +393,6 @@ jobs:
                   btnPlayRecent = findViewById(R.id.btnPlayRecent);
               }
 
-              // ==========================================
-              // FUTURE-PROOF PERMISSION MATRIX ENGINE
-              // ==========================================
               private void checkAndRequestPermissions() {
                   String[] permissions = {
                       Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -421,7 +425,6 @@ jobs:
                   }
                   
                   if (!allGranted) {
-                      // Smart Redirect Matrix if Denied
                       new AlertDialog.Builder(this)
                           .setTitle("Engine Access Required")
                           .setMessage("Z+2 requires Full Storage & Network access to download 1GB+ files. Please tap ALLOW in settings.")
@@ -438,14 +441,11 @@ jobs:
                   }
               }
 
-              // ==========================================
-              // DUAL-TURBO NETWORK & HARDWARE LOCKS
-              // ==========================================
               private void activateHardwareLocks() {
                   try {
                       PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
                       wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ZPlus::DownloadWakeLock");
-                      wakeLock.acquire(10 * 60 * 1000L); // 10 minutes lock
+                      wakeLock.acquire(10 * 60 * 1000L); 
 
                       WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                       wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "ZPlus::HotspotTurboLock");
@@ -513,16 +513,27 @@ jobs:
                   webViewCore.loadUrl(query);
               }
 
-              // ==========================================
-              // ZERO-RESTRICTION BROWSER ENGINE
-              // ==========================================
               private void configureTurboBrowser() {
                   WebSettings s = webViewCore.getSettings();
                   s.setJavaScriptEnabled(true);
                   s.setDomStorageEnabled(true);
                   s.setUseWideViewPort(true);
 
-                  webViewCore.setWebViewClient(new WebViewClient());
+                  webViewCore.setWebViewClient(new WebViewClient() {
+                      // IN-BUILT AD BLOCKER ENGINE
+                      @Override
+                      public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                          String url = request.getUrl().toString().toLowerCase();
+                          for (String adHost : AD_HOSTS) {
+                              if (url.contains(adHost)) {
+                                  // Block the Ad request by returning empty data
+                                  return new WebResourceResponse("text/plain", "UTF-8", new ByteArrayInputStream("".getBytes()));
+                              }
+                          }
+                          return super.shouldInterceptRequest(view, request);
+                      }
+                  });
+                  
                   webViewCore.setWebChromeClient(new WebChromeClient() {
                       public void onProgressChanged(WebView v, int p) {
                           webProgress.setProgress(p);
@@ -530,16 +541,12 @@ jobs:
                       }
                   });
 
-                  // THE UNRESTRICTED DOWNLOAD LISTENER (No APK Block, No Size Block)
                   webViewCore.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
                       Toast.makeText(MainActivity.this, "Z+2 Turbo Engine Starting Download...", Toast.LENGTH_LONG).show();
                       startMultiThreadedDownload(url, contentDisposition);
                   });
               }
 
-              // ==========================================
-              // MULTI-THREADED CHUNKING & LARGE BUFFER ENGINE
-              // ==========================================
               private void startMultiThreadedDownload(String fileUrl, String contentDisp) {
                   downloadEnginePool.execute(() -> {
                       try {
@@ -561,7 +568,6 @@ jobs:
                           InputStream input = conn.getInputStream();
                           FileOutputStream output = new FileOutputStream(file);
 
-                          // Mobile Data Optimizer: Massive 262144 bytes chunk size for 4G/LTE/5G
                           byte[] buffer = new byte[262144]; 
                           int bytesRead;
                           long total = 0;
@@ -641,6 +647,7 @@ jobs:
                   android:supportsRtl="true"
                   android:hardwareAccelerated="true"
                   android:requestLegacyExternalStorage="true"
+                  android:usesCleartextTraffic="true"
                   android:theme="@style/Theme.AppCompat.Light.NoActionBar">
                   <activity
                       android:name=".MainActivity"
